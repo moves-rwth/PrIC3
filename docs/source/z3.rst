@@ -1,0 +1,9 @@
+======
+``z3``
+======
+
+.. automodule:: z3
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :imported-members:

@@ -1,0 +1,98 @@
+Frames for full MDP:
+
+
+lambda = 2/3:
+
+Frames before entering the main loop:
+[None, set()]
+
+Frames after iteration 1
+[None, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 2/3)}, set()]
+
+
+Frames after iteration 2
+[None, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 2/3), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 2/3), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 2/3)}, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 2/3), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 2/3)}, {(2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 2/3)}]
+
+Final frames (after 3 iterations):
+[None, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 2/3), (3, (x0 == False, x1 == False, x2 == False, x3 == True, xg == False, xsink == False), 2/3), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 2/3), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 2/3)}, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 2/3), (3, (x0 == False, x1 == False, x2 == False, x3 == True, xg == False, xsink == False), 2/3), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 2/3), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 2/3)}, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 2/3), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 2/3)}, set()]
+
+-------------------- Statistics ---------------
+Made no progress in oracle states: 0
+Total Time: 0.10677719116210938
+Inductiveness check time (SMT) for 19 checks: 0.006926774978637695
+	of which for 13 successful instances: 0.0034117698669433594
+	and of which for 6 unsuccessful instances: 0.003515005111694336
+Frame Push Time: 0
+Time for getting probabilties: 0.005957603454589844
+Calls to get_Probabilities: 3
+	EQ System==Sat: 2
+	Had to solve optimization problem: 0
+Number refine_oracle calls: 1
+Number oracle states: 4
+Number propagated assertions: 2
+Propagation Time: 0.017148971557617188
+Time for caching states of the same kind: 0
+Considered states: 4
+
+
+
+
+
+lambda = 0.7
+
+Frames before entering the main loop:
+[None, set()]
+
+Frames after iteration 1
+[None, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, set()]
+
+
+Frames after iteration 2
+[None, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 7/10), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 7/10), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, {(2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 7/10), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, {(2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 7/10)}]
+
+Final frames (after 3 iterations):
+[None, {(3, (x0 == False, x1 == False, x2 == False, x3 == True, xg == False, xsink == False), 7/10), (1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 7/10), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 7/10), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, {(3, (x0 == False, x1 == False, x2 == False, x3 == True, xg == False, xsink == False), 7/10), (1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 7/10), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 7/10), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, {(2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 7/10), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, set()]
+
+-------------------- Statistics ---------------
+Made no progress in oracle states: 0
+Total Time: 0.09897899627685547
+Inductiveness check time (SMT) for 19 checks: 0.007067441940307617
+	of which for 13 successful instances: 0.004105091094970703
+	and of which for 6 unsuccessful instances: 0.002962350845336914
+Frame Push Time: 0
+Time for getting probabilties: 0.004389047622680664
+Calls to get_Probabilities: 3
+	EQ System==Sat: 2
+	Had to solve optimization problem: 0
+Number refine_oracle calls: 1
+Number oracle states: 4
+Number propagated assertions: 2
+Propagation Time: 0.014965057373046875
+Time for caching states of the same kind: 0
+Considered states: 4
+
+
+
+
+
+Refuting run:
+
+Made no progress in oracle states: 0
+Total Time: 0.1348729133605957
+Inductiveness check time (SMT) for 15 checks: 0.008391141891479492
+	of which for 6 successful instances: 0.0032460689544677734
+	and of which for 9 unsuccessful instances: 0.005145072937011719
+Frame Push Time: 0
+Time for getting probabilties: 0.007173776626586914
+Calls to get_Probabilities: 6
+	EQ System==Sat: 3
+	Had to solve optimization problem: 0
+Number refine_oracle calls: 4
+Number oracle states: 4
+Number propagated assertions: 0
+Propagation Time: 0.003767251968383789
+Time for caching states of the same kind: 0
+Considered states: 3
+
+state-ids of critical subsystem:
+pric3.pric3: {0, 1, 2, 3}

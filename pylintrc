@@ -1,0 +1,21 @@
+[MASTER]
+ignore=
+load-plugins=
+
+[MESSAGES CONTROL]
+disable=missing-docstring,line-too-long,too-few-public-methods,unused-wildcard-import
+
+[VARIABLES]
+init-import=no
+
+[TYPECHECK]
+ignored-modules=stormpy,z3,graphviz
+
+[BASIC]
+good-names=T,i
+
+[FORMAT]
+max-line-length=120
+
+[MISCELLANEOUS]
+notes=FIXME,XXX,TODO

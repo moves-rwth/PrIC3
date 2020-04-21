@@ -1,0 +1,209 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pric3.smt &#8212; PrIC3  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pric3.smt</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">We build a wrapper around pySMT to allow for a nicer generation of SMTLib code with comments and generally nicer formatting.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">StringIO</span>
+<span class="kn">import</span> <span class="nn">pysmt.smtlib.script</span> <span class="k">as</span> <span class="nn">pysmtscript</span>
+<span class="kn">from</span> <span class="nn">pysmt.smtlib.printers</span> <span class="k">import</span> <span class="n">SmtPrinter</span>
+<span class="kn">from</span> <span class="nn">pysmt.shortcuts</span> <span class="k">import</span> <span class="n">get_env</span><span class="p">,</span> <span class="n">And</span><span class="p">,</span> <span class="n">is_sat</span>
+<span class="kn">from</span> <span class="nn">pric3.utils</span> <span class="k">import</span> <span class="n">intersperse</span>
+<span class="kn">import</span> <span class="nn">pysmt.smtlib.commands</span> <span class="k">as</span> <span class="nn">smtcmd</span>
+
+<span class="n">COMMENT</span> <span class="o">=</span> <span class="s1">&#39;comment&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">We add a new command type that is handled by our SmtScript to print comments.</span>
+<span class="sd">A command [COMMENT, line1, line2] generates two lines of comments.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="SmtCommand"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtCommand">[docs]</a><span class="k">class</span> <span class="nc">SmtCommand</span><span class="p">(</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;SmtCommand&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;args&#39;</span><span class="p">])):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A command to the SMT solver, which allows for COMMENT commands.</span>
+<span class="sd">    Re-uses SmtLibCommand from pysmt.</span>
+
+<span class="sd">    :param name: Command name from pysmt.commands or COMMENT.</span>
+<span class="sd">    :param args: List of arguments for the command.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="SmtCommand.serialize"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtCommand.serialize">[docs]</a>    <span class="k">def</span> <span class="nf">serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">printer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Serialize this command using a printer from pysmt.smtlib.printers.&quot;&quot;&quot;</span>
+        <span class="n">outstream</span> <span class="o">=</span> <span class="n">printer</span><span class="o">.</span><span class="n">stream</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">COMMENT</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;args should be a list/iterator, not str/bytes&quot;</span><span class="p">)</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="p">(</span><span class="n">line</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">splitlines</span><span class="p">())</span>
+            <span class="n">lines</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;; </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">intersperse</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
+                <span class="n">outstream</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">pysmtscript</span><span class="o">.</span><span class="n">SmtLibCommand</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                      <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">printer</span><span class="o">=</span><span class="n">printer</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SmtCommand.serialize_to_string"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtCommand.serialize_to_string">[docs]</a>    <span class="k">def</span> <span class="nf">serialize_to_string</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Serialize this command directly to a string.&quot;&quot;&quot;</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">SmtPrinter</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">buf</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="SmtScript"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtScript">[docs]</a><span class="k">class</span> <span class="nc">SmtScript</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A SmtScript contains a list of commands.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="SmtScript.add_command"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtScript.add_command">[docs]</a>    <span class="k">def</span> <span class="nf">add_command</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a new SmtCommand with the given name and arguments.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">SmtCommand</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="SmtScript.add_comment"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtScript.add_comment">[docs]</a>    <span class="k">def</span> <span class="nf">add_comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">lines</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a comment command.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">COMMENT</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">lines</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SmtScript.add_declare_fun"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtScript.add_declare_fun">[docs]</a>    <span class="k">def</span> <span class="nf">add_declare_fun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Declare a function.&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">symbol</span><span class="o">.</span><span class="n">is_symbol</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">smtcmd</span><span class="o">.</span><span class="n">DECLARE_FUN</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">symbol</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="SmtScript.add_declare_const"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtScript.add_declare_const">[docs]</a>    <span class="k">def</span> <span class="nf">add_declare_const</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Declare a constant.&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">symbol</span><span class="o">.</span><span class="n">is_symbol</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">smtcmd</span><span class="o">.</span><span class="n">DECLARE_CONST</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">symbol</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="SmtScript.add_assert_formula"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtScript.add_assert_formula">[docs]</a>    <span class="k">def</span> <span class="nf">add_assert_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formula</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add an assertion of a formula to the script.</span>
+<span class="sd">        This assumes all necessary types and variables are already declared.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">smtcmd</span><span class="o">.</span><span class="n">ASSERT</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[</span><span class="n">formula</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="SmtScript.add_check_sat"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtScript.add_check_sat">[docs]</a>    <span class="k">def</span> <span class="nf">add_check_sat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a CHECK_SAT command.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_command</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">smtcmd</span><span class="o">.</span><span class="n">CHECK_SAT</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">[])</span></div>
+
+<div class="viewcode-block" id="SmtScript.serialize_to_smtlib"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtScript.serialize_to_smtlib">[docs]</a>    <span class="k">def</span> <span class="nf">serialize_to_smtlib</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Serialize this SmtScript to a SMTLib script.&quot;&quot;&quot;</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">()</span>
+        <span class="n">printer</span> <span class="o">=</span> <span class="n">SmtPrinter</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">:</span>
+            <span class="n">cmd</span><span class="o">.</span><span class="n">serialize</span><span class="p">(</span><span class="n">printer</span><span class="p">)</span>
+            <span class="n">buf</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">buf</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="SmtScript.is_pure"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtScript.is_pure">[docs]</a>    <span class="k">def</span> <span class="nf">is_pure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Whether this script only contains assertions and declarations.</span>
+<span class="sd">        This allows us to check satisfiability using the pySMT shortcuts</span>
+<span class="sd">        without generating the SMTLib script explicitly.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pure_commands</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">COMMENT</span><span class="p">,</span> <span class="n">smtcmd</span><span class="o">.</span><span class="n">DECLARE_FUN</span><span class="p">,</span> <span class="n">smtcmd</span><span class="o">.</span><span class="n">DECLARE_CONST</span><span class="p">,</span>
+            <span class="n">smtcmd</span><span class="o">.</span><span class="n">DEFINE_FUN</span><span class="p">,</span> <span class="n">smtcmd</span><span class="o">.</span><span class="n">ASSERT</span><span class="p">,</span> <span class="n">smtcmd</span><span class="o">.</span><span class="n">CHECK_SAT</span>
+        <span class="p">]</span>
+        <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cmd</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pure_commands</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="SmtScript.to_pure_formula"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtScript.to_pure_formula">[docs]</a>    <span class="k">def</span> <span class="nf">to_pure_formula</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If this script is pure (see is_pure), then we can generate a single</span>
+<span class="sd">        pySMT formula from this script by simply ANDing all individual ASSERT formulas.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_pure</span><span class="p">()</span>
+        <span class="n">formulas</span> <span class="o">=</span> <span class="p">(</span><span class="n">cmd</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">cmd</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">commands</span>
+                    <span class="k">if</span> <span class="n">cmd</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">smtcmd</span><span class="o">.</span><span class="n">ASSERT</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">And</span><span class="p">(</span><span class="o">*</span><span class="n">formulas</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SmtScript.print_and_sat_pure"><a class="viewcode-back" href="../../index.html#pric3.smt.SmtScript.print_and_sat_pure">[docs]</a>    <span class="k">def</span> <span class="nf">print_and_sat_pure</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        If this script is pure, print the SMTLib code and check if it is satisfiable.</span>
+<span class="sd">        Returns the formula so you could do e.g. get_model(formula).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;# SMTLib script:&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serialize_to_smtlib</span><span class="p">())</span>
+        <span class="n">formula</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_pure_formula</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;# SAT Result: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">is_sat</span><span class="p">(</span><span class="n">formula</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">formula</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Philipp Schroer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

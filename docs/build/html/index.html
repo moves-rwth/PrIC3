@@ -1,0 +1,281 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>PrIC3 Documentation &#8212; PrIC3  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/language_data.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="pric3-documentation">
+<h1>PrIC3 Documentation<a class="headerlink" href="#pric3-documentation" title="Permalink to this headline">¶</a></h1>
+<div class="toctree-wrapper compound">
+</div>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+</ul>
+<div class="section" id="api-reference">
+<h2>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h2>
+<div class="contents local topic" id="contents">
+<ul class="simple">
+<li><p><a class="reference internal" href="#module-pric3.prism_to_smt" id="id1">PRISM to SMT Translation</a></p></li>
+<li><p><a class="reference internal" href="#module-pric3.smt" id="id2">SMT API Wrapper</a></p></li>
+<li><p><a class="reference internal" href="#module-pric3.utils" id="id3">Utils</a></p></li>
+</ul>
+</div>
+<span class="target" id="module-pric3"></span><span class="target" id="module-pric3.cmd"></span><div class="section" id="module-pric3.prism_to_smt">
+<span id="prism-to-smt-translation"></span><h3><a class="toc-backref" href="#id1">PRISM to SMT Translation</a><a class="headerlink" href="#module-pric3.prism_to_smt" title="Permalink to this headline">¶</a></h3>
+<p>Translation of a PRISM program to SMT commands.</p>
+<dl class="function">
+<dt id="pric3.prism_to_smt.translate_prism_to_smt">
+<code class="sig-prename descclassname">pric3.prism_to_smt.</code><code class="sig-name descname">translate_prism_to_smt</code><span class="sig-paren">(</span><em class="sig-param">program</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/prism_to_smt.html#translate_prism_to_smt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.prism_to_smt.translate_prism_to_smt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Translates a PRISM program to a smt script.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>program</strong> – The PRISM program with exactly one “main” module.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>The SMT script that corresponds to checking the PRISM program.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="pric3.prism_to_smt.LoopProgram">
+<em class="property">class </em><code class="sig-prename descclassname">pric3.prism_to_smt.</code><code class="sig-name descname">LoopProgram</code><span class="sig-paren">(</span><em class="sig-param">program</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/prism_to_smt.html#LoopProgram"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.prism_to_smt.LoopProgram" title="Permalink to this definition">¶</a></dt>
+<dd><p>An input PRISM program that models a loop with a guard, a goal and a main module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Variables</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>program</strong> – the PRISM program</p></li>
+<li><p><strong>module</strong> – the main module of the program</p></li>
+<li><p><strong>guard</strong> – the expression labelled “guard”</p></li>
+<li><p><strong>goal</strong> – the expression labelled “goal”</p></li>
+<li><p><strong>env</strong> – the environment</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="pric3.prism_to_smt.Env">
+<em class="property">class </em><code class="sig-prename descclassname">pric3.prism_to_smt.</code><code class="sig-name descname">Env</code><span class="sig-paren">(</span><em class="sig-param">module</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/prism_to_smt.html#Env"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.prism_to_smt.Env" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maintains an ordered list of program variables as symbols
+and has factory methods to create functions that operate on the environment.</p>
+<dl class="method">
+<dt id="pric3.prism_to_smt.Env.function_symbol">
+<code class="sig-name descname">function_symbol</code><span class="sig-paren">(</span><em class="sig-param">name</em>, <em class="sig-param">return_type</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/prism_to_smt.html#Env.function_symbol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.prism_to_smt.Env.function_symbol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a new FunctionType symbol that receives all environment variables as arguments.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pric3.prism_to_smt.Env.forall">
+<code class="sig-name descname">forall</code><span class="sig-paren">(</span><em class="sig-param">formula</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/prism_to_smt.html#Env.forall"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.prism_to_smt.Env.forall" title="Permalink to this definition">¶</a></dt>
+<dd><p>Wrap formula in a forall quantifier with all environment variables.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pric3.prism_to_smt.Env.apply">
+<code class="sig-name descname">apply</code><span class="sig-paren">(</span><em class="sig-param">symbol</em>, <em class="sig-param">values={}</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/prism_to_smt.html#Env.apply"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.prism_to_smt.Env.apply" title="Permalink to this definition">¶</a></dt>
+<dd><p>Apply a function that takes all environment variables with optional valuations.
+TODO documentation</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pric3.prism_to_smt.Env.get">
+<code class="sig-name descname">get</code><span class="sig-paren">(</span><em class="sig-param">prism_var</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/prism_to_smt.html#Env.get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.prism_to_smt.Env.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resolve a PRISM program variable to a symbol.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pric3.smt">
+<span id="smt-api-wrapper"></span><h3><a class="toc-backref" href="#id2">SMT API Wrapper</a><a class="headerlink" href="#module-pric3.smt" title="Permalink to this headline">¶</a></h3>
+<p>We build a wrapper around pySMT to allow for a nicer generation of SMTLib code with comments and generally nicer formatting.</p>
+<dl class="data">
+<dt id="pric3.smt.COMMENT">
+<code class="sig-prename descclassname">pric3.smt.</code><code class="sig-name descname">COMMENT</code><em class="property"> = 'comment'</em><a class="headerlink" href="#pric3.smt.COMMENT" title="Permalink to this definition">¶</a></dt>
+<dd><p>We add a new command type that is handled by our SmtScript to print comments.
+A command [COMMENT, line1, line2] generates two lines of comments.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="pric3.smt.SmtCommand">
+<em class="property">class </em><code class="sig-prename descclassname">pric3.smt.</code><code class="sig-name descname">SmtCommand</code><a class="reference internal" href="_modules/pric3/smt.html#SmtCommand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtCommand" title="Permalink to this definition">¶</a></dt>
+<dd><p>A command to the SMT solver, which allows for COMMENT commands.
+Re-uses SmtLibCommand from pysmt.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> – Command name from pysmt.commands or COMMENT.</p></li>
+<li><p><strong>args</strong> – List of arguments for the command.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="method">
+<dt id="pric3.smt.SmtCommand.serialize">
+<code class="sig-name descname">serialize</code><span class="sig-paren">(</span><em class="sig-param">printer</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/smt.html#SmtCommand.serialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtCommand.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize this command using a printer from pysmt.smtlib.printers.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pric3.smt.SmtCommand.serialize_to_string">
+<code class="sig-name descname">serialize_to_string</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/smt.html#SmtCommand.serialize_to_string"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtCommand.serialize_to_string" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize this command directly to a string.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pric3.smt.SmtScript">
+<em class="property">class </em><code class="sig-prename descclassname">pric3.smt.</code><code class="sig-name descname">SmtScript</code><a class="reference internal" href="_modules/pric3/smt.html#SmtScript"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtScript" title="Permalink to this definition">¶</a></dt>
+<dd><p>A SmtScript contains a list of commands.</p>
+<dl class="method">
+<dt id="pric3.smt.SmtScript.add_command">
+<code class="sig-name descname">add_command</code><span class="sig-paren">(</span><em class="sig-param">*</em>, <em class="sig-param">name</em>, <em class="sig-param">args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/smt.html#SmtScript.add_command"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtScript.add_command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a new SmtCommand with the given name and arguments.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pric3.smt.SmtScript.add_comment">
+<code class="sig-name descname">add_comment</code><span class="sig-paren">(</span><em class="sig-param">*lines</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/smt.html#SmtScript.add_comment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtScript.add_comment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a comment command.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pric3.smt.SmtScript.add_declare_fun">
+<code class="sig-name descname">add_declare_fun</code><span class="sig-paren">(</span><em class="sig-param">symbol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/smt.html#SmtScript.add_declare_fun"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtScript.add_declare_fun" title="Permalink to this definition">¶</a></dt>
+<dd><p>Declare a function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pric3.smt.SmtScript.add_declare_const">
+<code class="sig-name descname">add_declare_const</code><span class="sig-paren">(</span><em class="sig-param">symbol</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/smt.html#SmtScript.add_declare_const"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtScript.add_declare_const" title="Permalink to this definition">¶</a></dt>
+<dd><p>Declare a constant.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pric3.smt.SmtScript.add_assert_formula">
+<code class="sig-name descname">add_assert_formula</code><span class="sig-paren">(</span><em class="sig-param">formula</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/smt.html#SmtScript.add_assert_formula"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtScript.add_assert_formula" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an assertion of a formula to the script.
+This assumes all necessary types and variables are already declared.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pric3.smt.SmtScript.add_check_sat">
+<code class="sig-name descname">add_check_sat</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/smt.html#SmtScript.add_check_sat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtScript.add_check_sat" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a CHECK_SAT command.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pric3.smt.SmtScript.serialize_to_smtlib">
+<code class="sig-name descname">serialize_to_smtlib</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/smt.html#SmtScript.serialize_to_smtlib"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtScript.serialize_to_smtlib" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize this SmtScript to a SMTLib script.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pric3.smt.SmtScript.is_pure">
+<code class="sig-name descname">is_pure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/smt.html#SmtScript.is_pure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtScript.is_pure" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether this script only contains assertions and declarations.
+This allows us to check satisfiability using the pySMT shortcuts
+without generating the SMTLib script explicitly.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pric3.smt.SmtScript.to_pure_formula">
+<code class="sig-name descname">to_pure_formula</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/smt.html#SmtScript.to_pure_formula"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtScript.to_pure_formula" title="Permalink to this definition">¶</a></dt>
+<dd><p>If this script is pure (see is_pure), then we can generate a single
+pySMT formula from this script by simply ANDing all individual ASSERT formulas.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pric3.smt.SmtScript.print_and_sat_pure">
+<code class="sig-name descname">print_and_sat_pure</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/smt.html#SmtScript.print_and_sat_pure"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.smt.SmtScript.print_and_sat_pure" title="Permalink to this definition">¶</a></dt>
+<dd><p>If this script is pure, print the SMTLib code and check if it is satisfiable.
+Returns the formula so you could do e.g. get_model(formula).</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-pric3.utils">
+<span id="utils"></span><h3><a class="toc-backref" href="#id3">Utils</a><a class="headerlink" href="#module-pric3.utils" title="Permalink to this headline">¶</a></h3>
+<dl class="function">
+<dt id="pric3.utils.intersperse">
+<code class="sig-prename descclassname">pric3.utils.</code><code class="sig-name descname">intersperse</code><span class="sig-paren">(</span><em class="sig-param">val</em>, <em class="sig-param">sequence</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pric3/utils.html#intersperse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pric3.utils.intersperse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Insert val between each element in the sequence</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Philipp Schroer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,399 @@
+Results for induced MC \sigma_a
+
+Pr (evt bad) = 5/9
+
+
+Frames for lambda = 5/9:
+
+
+
+
+Using z3 version 4.8.4
+Using stormpy version 1.4.1
+Settings(default_oracle_value=Fraction(0, 1), check_inductiveness_if_property_holds=True, check_relative_inductiveness_of_frames=False, obligation_queue_class='ObligationQueue', oracle_type='perfect', depth_for_partly_solving_lqs=200, simulator='cpp', number_simulations_for_oracle=10000, max_number_steps_per_simulation=1000000, propagate=False, forall_mode='globals', inline_goal=True, int_to_real=False, export_to_smt2=None, store_smt_calls=0, generalize=False, generalization_method='Linear', max_num_ctgs=1)
+pric3.pric3: Initialize various auxiliary objects...
+pric3.oracles.oracle: Refined oracle.
+pric3.pric3: Start IC3
+Frames before entering the main loop:
+[None, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=1
+pric3.pric3: Rel ind checks so far: 1
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 1
+[None, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 5/9)}, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=2
+pric3.pric3: Rel ind checks so far: 5
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 2
+[None, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 11/18), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 1/2), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 5/9)}, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 5/9)}, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=3
+pric3.pric3: Rel ind checks so far: 12
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 3
+[None, {(3, (x0 == False, x1 == False, x2 == False, x3 == True, xg == False, xsink == False), 2/3), (1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 11/18), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 1/2), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 5/9)}, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 11/18), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 1/2), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 5/9)}, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 5/9)}, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=4
+pric3.pric3: Rel ind checks so far: 19
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+pric3.pric3:
+pric3.pric3: Equal Frames 1 and 2
+
+
+Final frames (after 4 iterations):
+[None, {(3, (x0 == False, x1 == False, x2 == False, x3 == True, xg == False, xsink == False), 2/3), (1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 11/18), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 1/2), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 5/9)}, {(3, (x0 == False, x1 == False, x2 == False, x3 == True, xg == False, xsink == False), 2/3), (1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 11/18), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 1/2), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 5/9)}, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 11/18), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 1/2), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 5/9)}, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 5/9)}, set()]
+-------------------- Statistics ---------------
+Made no progress in oracle states: 0
+Total Time: 0.11649489402770996
+Inductiveness check time (SMT) for 19 checks: 0.006596565246582031
+	of which for 14 successful instances: 0.0032515525817871094
+	and of which for 5 unsuccessful instances: 0.003345012664794922
+Frame Push Time: 0
+Time for getting probabilties: 0.004427909851074219
+Calls to get_Probabilities: 5
+	EQ System==Sat: 2
+	Had to solve optimization problem: 0
+Number refine_oracle calls: 1
+Number oracle states: 4
+pric3.pric3: Inductiveness verified :)
+Number propagated assertions: 0
+Propagation Time: 0.0006911754608154297
+pric3.pric3: Property holds.
+Time for caching states of the same kind: 0
+Considered states: 4
+
+
+
+
+
+
+
+lambda = 0.6
+
+Settings(default_oracle_value=Fraction(0, 1), check_inductiveness_if_property_holds=True, check_relative_inductiveness_of_frames=False, obligation_queue_class='ObligationQueue', oracle_type='perfect', depth_for_partly_solving_lqs=200, simulator='cpp', number_simulations_for_oracle=10000, max_number_steps_per_simulation=1000000, propagate=False, forall_mode='globals', inline_goal=True, int_to_real=False, export_to_smt2=None, store_smt_calls=0, generalize=False, generalization_method='Linear', max_num_ctgs=1)
+pric3.pric3: Initialize various auxiliary objects...
+pric3.oracles.oracle: Refined oracle.
+pric3.pric3: Start IC3
+Frames before entering the main loop:
+[None, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=1
+pric3.pric3: Rel ind checks so far: 1
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 1
+[None, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 3/5)}, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=2
+pric3.pric3: Rel ind checks so far: 5
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 2
+[None, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 33/50), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 27/50), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 3/5)}, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 3/5)}, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=3
+pric3.pric3: Rel ind checks so far: 12
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 3
+[None, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 33/50), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 27/50), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 3/5), (3, (x0 == False, x1 == False, x2 == False, x3 == True, xg == False, xsink == False), 18/25)}, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 33/50), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 27/50), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 3/5)}, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 3/5)}, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=4
+pric3.pric3: Rel ind checks so far: 19
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Final frames (after 4 iterations):
+pric3.pric3:
+pric3.pric3: Equal Frames 1 and 2
+pric3.pric3: Inductiveness verified :)
+[None, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 33/50), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 27/50), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 3/5), (3, (x0 == False, x1 == False, x2 == False, x3 == True, xg == False, xsink == False), 18/25)}, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 33/50), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 27/50), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 3/5), (3, (x0 == False, x1 == False, x2 == False, x3 == True, xg == False, xsink == False), 18/25)}, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 33/50), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 27/50), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 3/5)}, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 3/5)}, set()]
+pric3.pric3: Property holds.
+-------------------- Statistics ---------------
+Made no progress in oracle states: 0
+Total Time: 0.1238698959350586
+Inductiveness check time (SMT) for 19 checks: 0.007140159606933594
+	of which for 14 successful instances: 0.0035860538482666016
+	and of which for 5 unsuccessful instances: 0.003554105758666992
+Frame Push Time: 0
+Time for getting probabilties: 0.0049517154693603516
+Calls to get_Probabilities: 5
+	EQ System==Sat: 2
+	Had to solve optimization problem: 0
+Number refine_oracle calls: 1
+Number oracle states: 4
+Number propagated assertions: 0
+Propagation Time: 0.0014908313751220703
+Time for caching states of the same kind: 0
+Considered states: 4
+
+
+
+
+
+
+
+
+
+Settings(default_oracle_value=Fraction(0, 1), check_inductiveness_if_property_holds=True, check_relative_inductiveness_of_frames=False, obligation_queue_class='ObligationQueue', oracle_type='perfect', depth_for_partly_solving_lqs=200, simulator='cpp', number_simulations_for_oracle=10000, max_number_steps_per_simulation=1000000, propagate=False, forall_mode='globals', inline_goal=True, int_to_real=False, export_to_smt2=None, store_smt_calls=0, generalize=False, generalization_method='Linear', max_num_ctgs=1)
+pric3.pric3: Initialize various auxiliary objects...
+pric3.oracles.oracle: Refined oracle.
+pric3.pric3: Start IC3
+Frames before entering the main loop:
+[None, set()]
+
+
+Frames after iteration 1
+pric3.pric3:
+pric3.pric3: New iteration k=1
+pric3.pric3: Rel ind checks so far: 1
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+[None, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=2
+pric3.pric3: Rel ind checks so far: 5
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 2
+[None, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 77/100), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 63/100), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=3
+pric3.pric3: Rel ind checks so far: 12
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 3
+[None, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 77/100), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 63/100), (3, (x0 == False, x1 == False, x2 == False, x3 == True, xg == False, xsink == False), 21/25), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 77/100), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 63/100), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=4
+pric3.pric3: Rel ind checks so far: 19
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Final frames (after 4 iterations):
+pric3.pric3:
+pric3.pric3: Equal Frames 1 and 2
+pric3.pric3: Inductiveness verified :)
+[None, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 77/100), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 63/100), (3, (x0 == False, x1 == False, x2 == False, x3 == True, xg == False, xsink == False), 21/25), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 77/100), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 63/100), (3, (x0 == False, x1 == False, x2 == False, x3 == True, xg == False, xsink == False), 21/25), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 77/100), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 63/100), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 7/10)}, set()]
+pric3.pric3: Property holds.
+-------------------- Statistics ---------------
+Made no progress in oracle states: 0
+Total Time: 0.12074804306030273
+Inductiveness check time (SMT) for 19 checks: 0.007405281066894531
+	of which for 14 successful instances: 0.0035054683685302734
+	and of which for 5 unsuccessful instances: 0.003899812698364258
+Frame Push Time: 0
+Time for getting probabilties: 0.0046596527099609375
+Calls to get_Probabilities: 5
+	EQ System==Sat: 2
+	Had to solve optimization problem: 0
+Number refine_oracle calls: 1
+Number oracle states: 4
+Number propagated assertions: 0
+Propagation Time: 0.0006864070892333984
+Time for caching states of the same kind: 0
+Considered states: 4
+
+
+
+
+
+
+
+lambda = 0.9
+
+Settings(default_oracle_value=Fraction(0, 1), check_inductiveness_if_property_holds=True, check_relative_inductiveness_of_frames=False, obligation_queue_class='ObligationQueue', oracle_type='perfect', depth_for_partly_solving_lqs=200, simulator='cpp', number_simulations_for_oracle=10000, max_number_steps_per_simulation=1000000, propagate=False, forall_mode='globals', inline_goal=True, int_to_real=False, export_to_smt2=None, store_smt_calls=0, generalize=False, generalization_method='Linear', max_num_ctgs=1)
+pric3.pric3: Initialize various auxiliary objects...
+pric3.oracles.oracle: Refined oracle.
+pric3.pric3: Start IC3
+Frames before entering the main loop:
+[None, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=1
+pric3.pric3: Rel ind checks so far: 1
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 1
+[None, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 9/10)}, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=2
+pric3.pric3: Rel ind checks so far: 5
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 2
+[None, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 99/100), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 81/100), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 9/10)}, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 9/10)}, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=3
+pric3.pric3: Rel ind checks so far: 9
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+pric3.pric3:
+pric3.pric3: Equal Frames 1 and 2
+
+
+Final frames (after 3 iterations):
+[None, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 99/100), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 81/100), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 9/10)}, {(1, (x0 == False, x1 == True, x2 == False, x3 == False, xg == False, xsink == False), 99/100), (2, (x0 == False, x1 == False, x2 == True, x3 == False, xg == False, xsink == False), 81/100), (0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 9/10)}, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 9/10)}, set()]
+-------------------- Statistics ---------------
+Made no progress in oracle states: 0
+Total Time: 0.06826186180114746
+Inductiveness check time (SMT) for 9 checks: 0.0037894248962402344
+	of which for 7 successful instances: 0.002060413360595703
+	and of which for 2 unsuccessful instances: 0.0017290115356445312
+Frame Push Time: 0
+Time for getting probabilties: 0.002117156982421875
+Calls to get_Probabilities: 2
+	EQ System==Sat: 1
+	Had to solve optimization problem: 0
+Number refine_oracle calls: 1
+Number oracle states: 4
+Number propagated assertions: 0
+Propagation Time: 0.0005688667297363281
+Time for caching states of the same kind: 0
+Considered states: 3
+pric3.pric3: Inductiveness verified :)
+pric3.pric3: Property holds.
+
+
+
+
+
+lambda = 0.5
+
+
+Settings(default_oracle_value=Fraction(0, 1), check_inductiveness_if_property_holds=True, check_relative_inductiveness_of_frames=False, obligation_queue_class='ObligationQueue', oracle_type='perfect', depth_for_partly_solving_lqs=200, simulator='cpp', number_simulations_for_oracle=10000, max_number_steps_per_simulation=1000000, propagate=False, forall_mode='globals', inline_goal=True, int_to_real=False, export_to_smt2=None, store_smt_calls=0, generalize=False, generalization_method='Linear', max_num_ctgs=1)
+pric3.pric3: Initialize various auxiliary objects...
+pric3.oracles.oracle: Refined oracle.
+pric3.pric3: Start IC3
+Frames before entering the main loop:
+[None, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=1
+pric3.pric3: Rel ind checks so far: 1
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 1
+[None, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 1/2)}, set()]
+pric3.oracles.oracle: Refined oracle.
+pric3.pric3:
+pric3.pric3: New iteration k=1
+pric3.pric3: Rel ind checks so far: 5
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 1
+[None, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 1/2)}, set()]
+pric3.oracles.oracle: Refined oracle.
+pric3.pric3:
+pric3.pric3: New iteration k=1
+pric3.pric3: Rel ind checks so far: 9
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 1
+[None, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 1/2)}, set()]
+-------------------- Statistics ---------------
+Made no progress in oracle states: 0
+Total Time: 0.12149977684020996
+Inductiveness check time (SMT) for 12 checks: 0.00670170783996582
+	of which for 6 successful instances: 0.0029938220977783203
+	and of which for 6 unsuccessful instances: 0.0037078857421875
+Frame Push Time: 0
+Time for getting probabilties: 0.007129192352294922
+Calls to get_Probabilities: 6
+	EQ System==Sat: 3
+	Had to solve optimization problem: 0
+Number refine_oracle calls: 4
+Number oracle states: 4
+Number propagated assertions: 0
+Propagation Time: 1.8835067749023438e-05
+Time for caching states of the same kind: 0
+Considered states: 3
+pric3.oracles.oracle: Refined oracle.
+pric3.pric3:
+pric3.pric3: New iteration k=2
+pric3.pric3: Rel ind checks so far: 12
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+pric3.pric3: Property does not hold.
+
+
+
+
+
+
+lambda = 0.1
+
+
+
+Settings(default_oracle_value=Fraction(0, 1), check_inductiveness_if_property_holds=True, check_relative_inductiveness_of_frames=False, obligation_queue_class='ObligationQueue', oracle_type='perfect', depth_for_partly_solving_lqs=200, simulator='cpp', number_simulations_for_oracle=10000, max_number_steps_per_simulation=1000000, propagate=False, forall_mode='globals', inline_goal=True, int_to_real=False, export_to_smt2=None, store_smt_calls=0, generalize=False, generalization_method='Linear', max_num_ctgs=1)
+pric3.pric3: Initialize various auxiliary objects...
+pric3.oracles.oracle: Refined oracle.
+pric3.pric3: Start IC3
+Frames before entering the main loop:
+[None, set()]
+pric3.pric3:
+pric3.pric3: New iteration k=1
+pric3.pric3: Rel ind checks so far: 1
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+
+
+Frames after iteration 1
+[None, {(0, (x0 == True, x1 == False, x2 == False, x3 == False, xg == False, xsink == False), 1/10)}, set()]
+pric3.oracles.oracle: Refined oracle.
+-------------------- Statistics ---------------
+Made no progress in oracle states: 0
+Total Time: 0.036515235900878906
+Inductiveness check time (SMT) for 4 checks: 0.002301454544067383
+	of which for 2 successful instances: 0.0010669231414794922
+	and of which for 2 unsuccessful instances: 0.0012345314025878906
+Frame Push Time: 0
+Time for getting probabilties: 0.0021152496337890625
+Calls to get_Probabilities: 2
+	EQ System==Sat: 1
+	Had to solve optimization problem: 0
+Number refine_oracle calls: 2
+Number oracle states: 4
+Number propagated assertions: 0
+Propagation Time: 7.867813110351562e-06
+Time for caching states of the same kind: 0
+Considered states: 3
+pric3.pric3:
+pric3.pric3: New iteration k=2
+pric3.pric3: Rel ind checks so far: 4
+pric3.pric3: Propagated assertions so far: 0
+pric3.pric3:
+pric3.pric3: Property does not hold.
+

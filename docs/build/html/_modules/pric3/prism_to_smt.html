@@ -1,0 +1,319 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pric3.prism_to_smt &#8212; PrIC3  documentation</title>
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for pric3.prism_to_smt</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Translation of a PRISM program to SMT commands.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">stormpy</span>
+<span class="kn">from</span> <span class="nn">pysmt.typing</span> <span class="k">import</span> <span class="n">INT</span><span class="p">,</span> <span class="n">BOOL</span><span class="p">,</span> <span class="n">REAL</span><span class="p">,</span> <span class="n">FunctionType</span>
+<span class="kn">from</span> <span class="nn">pysmt.shortcuts</span> <span class="k">import</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">ForAll</span><span class="p">,</span> <span class="n">get_model</span><span class="p">,</span> <span class="n">Function</span><span class="p">,</span> <span class="n">Iff</span><span class="p">,</span> <span class="n">Not</span><span class="p">,</span> <span class="n">Real</span><span class="p">,</span> <span class="n">LE</span><span class="p">,</span> <span class="n">GE</span><span class="p">,</span> <span class="n">And</span><span class="p">,</span> <span class="n">TRUE</span><span class="p">,</span> <span class="n">Implies</span><span class="p">,</span> <span class="n">Not</span><span class="p">,</span> <span class="n">Equals</span><span class="p">,</span> <span class="n">Ite</span><span class="p">,</span> <span class="n">Plus</span><span class="p">,</span> <span class="n">Times</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">Or</span><span class="p">,</span> <span class="n">Xor</span><span class="p">,</span> <span class="n">Implies</span><span class="p">,</span> <span class="n">Times</span><span class="p">,</span> <span class="n">Min</span><span class="p">,</span> <span class="n">Max</span><span class="p">,</span> <span class="n">NotEquals</span><span class="p">,</span> <span class="n">LT</span><span class="p">,</span> <span class="n">LE</span><span class="p">,</span> <span class="n">GT</span><span class="p">,</span> <span class="n">Minus</span>
+<span class="kn">from</span> <span class="nn">pysmt.smtlib.script</span> <span class="k">import</span> <span class="n">smtlibscript_from_formula</span>
+<span class="kn">from</span> <span class="nn">io</span> <span class="k">import</span> <span class="n">StringIO</span>
+<span class="kn">from</span> <span class="nn">pric3.smt</span> <span class="k">import</span> <span class="n">SmtScript</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+
+<div class="viewcode-block" id="translate_prism_to_smt"><a class="viewcode-back" href="../../index.html#pric3.prism_to_smt.translate_prism_to_smt">[docs]</a><span class="k">def</span> <span class="nf">translate_prism_to_smt</span><span class="p">(</span><span class="n">program</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Translates a PRISM program to a smt script.</span>
+
+<span class="sd">    :param program: The PRISM program with exactly one &quot;main&quot; module.</span>
+<span class="sd">    :rtype: The SMT script that corresponds to checking the PRISM program.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">script</span> <span class="o">=</span> <span class="n">SmtScript</span><span class="p">()</span>
+    <span class="n">program</span> <span class="o">=</span> <span class="n">LoopProgram</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+    <span class="n">ev</span> <span class="o">=</span> <span class="n">_declare_ev</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">)</span>
+    <span class="n">guard</span> <span class="o">=</span> <span class="n">_define_guard</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">)</span>
+    <span class="n">goal</span> <span class="o">=</span> <span class="n">_define_goal</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">)</span>
+    <span class="n">_assert_sink_states</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">ev</span><span class="p">,</span> <span class="n">guard</span><span class="p">,</span> <span class="n">goal</span><span class="p">)</span>
+    <span class="n">_define_phi</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">ev</span><span class="p">,</span> <span class="n">guard</span><span class="p">,</span> <span class="n">goal</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">script</span></div>
+
+<span class="k">def</span> <span class="nf">_get_main_module</span><span class="p">(</span><span class="n">program</span><span class="p">):</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">modules</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+    <span class="n">main</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">assert</span> <span class="n">main</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;main&quot;</span>
+    <span class="k">return</span> <span class="n">main</span>
+
+<div class="viewcode-block" id="LoopProgram"><a class="viewcode-back" href="../../index.html#pric3.prism_to_smt.LoopProgram">[docs]</a><span class="k">class</span> <span class="nc">LoopProgram</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An input PRISM program that models a loop with a guard, a goal and a main module.</span>
+
+<span class="sd">    :ivar program: the PRISM program</span>
+<span class="sd">    :ivar module: the main module of the program</span>
+<span class="sd">    :ivar guard: the expression labelled &quot;guard&quot;</span>
+<span class="sd">    :ivar goal: the expression labelled &quot;goal&quot;</span>
+<span class="sd">    :ivar env: the environment</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">program</span> <span class="o">=</span> <span class="n">program</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">module</span> <span class="o">=</span> <span class="n">_get_main_module</span><span class="p">(</span><span class="n">program</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">guard</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">get_label_expression</span><span class="p">(</span><span class="s2">&quot;guard&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">goal</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">get_label_expression</span><span class="p">(</span><span class="s2">&quot;goal&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">Env</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Env"><a class="viewcode-back" href="../../index.html#pric3.prism_to_smt.Env">[docs]</a><span class="k">class</span> <span class="nc">Env</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Maintains an ordered list of program variables as symbols</span>
+<span class="sd">    and has factory methods to create functions that operate on the environment.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">module</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a new environment with new symbols for all variables in the module.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">var_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">integer_variables</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">var_dict</span><span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">INT</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="n">module</span><span class="o">.</span><span class="n">boolean_variables</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">var_dict</span><span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Symbol</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">BOOL</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">vars</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">var_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">var_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">types</span> <span class="o">=</span> <span class="p">[</span><span class="n">var</span><span class="o">.</span><span class="n">symbol_type</span><span class="p">()</span> <span class="k">for</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">]</span>
+
+<div class="viewcode-block" id="Env.function_symbol"><a class="viewcode-back" href="../../index.html#pric3.prism_to_smt.Env.function_symbol">[docs]</a>    <span class="k">def</span> <span class="nf">function_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">return_type</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a new FunctionType symbol that receives all environment variables as arguments.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Symbol</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">FunctionType</span><span class="p">(</span><span class="n">return_type</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">types</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Env.forall"><a class="viewcode-back" href="../../index.html#pric3.prism_to_smt.Env.forall">[docs]</a>    <span class="k">def</span> <span class="nf">forall</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">formula</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Wrap formula in a forall quantifier with all environment variables.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ForAll</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vars</span><span class="p">,</span> <span class="n">formula</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Env.apply"><a class="viewcode-back" href="../../index.html#pric3.prism_to_smt.Env.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">dict</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply a function that takes all environment variables with optional valuations.</span>
+<span class="sd">        TODO documentation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">var</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">var</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">Function</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Env.get"><a class="viewcode-back" href="../../index.html#pric3.prism_to_smt.Env.get">[docs]</a>    <span class="k">def</span> <span class="nf">get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prism_var</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resolve a PRISM program variable to a symbol.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">var_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prism_var</span><span class="p">)</span></div></div>
+
+<span class="k">def</span> <span class="nf">_define_fun</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">return_type</span><span class="p">,</span> <span class="n">make_formula</span><span class="p">):</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">env</span>
+    <span class="n">fun</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">function_symbol</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">return_type</span><span class="p">)</span>
+    <span class="n">script</span><span class="o">.</span><span class="n">add_declare_fun</span><span class="p">(</span><span class="n">fun</span><span class="p">)</span>
+    <span class="n">script</span><span class="o">.</span><span class="n">add_assert_formula</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">forall</span><span class="p">(</span><span class="n">make_formula</span><span class="p">(</span><span class="n">fun</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">fun</span>
+
+<span class="k">def</span> <span class="nf">_declare_ev</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
+    <span class="n">script</span><span class="o">.</span><span class="n">add_comment</span><span class="p">(</span>
+        <span class="s2">&quot;--- ev function ---&quot;</span><span class="p">,</span>
+        <span class="s1">&#39;One &quot;variable&quot; for each state. ev is 1-bounded expectation.&#39;</span>
+    <span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">env</span>
+    <span class="k">return</span> <span class="n">_define_fun</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;ev&quot;</span><span class="p">,</span>
+        <span class="n">return_type</span><span class="o">=</span><span class="n">REAL</span><span class="p">,</span>
+        <span class="n">make_formula</span><span class="o">=</span><span class="k">lambda</span> <span class="n">ev</span><span class="p">:</span> <span class="n">And</span><span class="p">(</span>
+            <span class="n">LE</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">ev</span><span class="p">),</span> <span class="n">Real</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span>
+            <span class="n">GE</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">ev</span><span class="p">),</span> <span class="n">Real</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
+    <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_translate_prism_expression</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">prism_expr</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">prism_expr</span><span class="o">.</span><span class="n">is_variable</span><span class="p">()</span> <span class="ow">and</span> <span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prism_expr</span><span class="o">.</span><span class="n">identifier</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">env</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">prism_expr</span><span class="o">.</span><span class="n">identifier</span><span class="p">())</span>
+    <span class="k">elif</span> <span class="n">prism_expr</span><span class="o">.</span><span class="n">is_variable</span><span class="p">()</span> <span class="ow">or</span> <span class="n">prism_expr</span><span class="o">.</span><span class="n">is_literal</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">prism_expr</span><span class="o">.</span><span class="n">has_boolean_type</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">Bool</span><span class="p">(</span><span class="n">prism_expr</span><span class="o">.</span><span class="n">evaluate_as_bool</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">prism_expr</span><span class="o">.</span><span class="n">has_integer_type</span><span class="p">():</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">prism_expr</span><span class="o">.</span><span class="n">evaluate_as_rational</span><span class="p">())</span>
+            <span class="k">return</span> <span class="n">Int</span><span class="p">(</span><span class="n">prism_expr</span><span class="o">.</span><span class="n">evaluate_as_int</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">prism_expr</span><span class="o">.</span><span class="n">has_rational_type</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">Real</span><span class="p">(</span><span class="n">prism_expr</span><span class="o">.</span><span class="n">evaluate_as_rational</span><span class="p">())</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">prism_expr</span><span class="o">.</span><span class="n">is_function_application</span><span class="p">:</span>
+        <span class="n">sot</span> <span class="o">=</span> <span class="n">stormpy</span><span class="o">.</span><span class="n">OperatorType</span>
+        <span class="n">operators</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">And</span><span class="p">:</span> <span class="n">And</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Or</span><span class="p">:</span> <span class="n">Or</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Xor</span><span class="p">:</span> <span class="n">Xor</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Implies</span><span class="p">:</span> <span class="n">Implies</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Iff</span><span class="p">:</span> <span class="n">Iff</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Plus</span><span class="p">:</span> <span class="n">Plus</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Minus</span><span class="p">:</span> <span class="n">Minus</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Times</span><span class="p">:</span> <span class="n">Times</span><span class="p">,</span>
+            <span class="c1"># TODO: Divide missing</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Min</span><span class="p">:</span> <span class="n">Min</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Max</span><span class="p">:</span> <span class="n">Max</span><span class="p">,</span>
+            <span class="c1"># TODO: Power, Modulo missing</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Equal</span><span class="p">:</span> <span class="n">Equals</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">NotEqual</span><span class="p">:</span> <span class="n">NotEquals</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Less</span><span class="p">:</span> <span class="n">LT</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">LessOrEqual</span><span class="p">:</span> <span class="n">LE</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Greater</span><span class="p">:</span> <span class="n">GT</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">GreaterOrEqual</span><span class="p">:</span> <span class="n">GE</span><span class="p">,</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Not</span><span class="p">:</span> <span class="n">Not</span><span class="p">,</span>
+            <span class="c1"># TODO: Floor and Ceil missing</span>
+            <span class="n">sot</span><span class="o">.</span><span class="n">Ite</span><span class="p">:</span> <span class="n">Ite</span>
+        <span class="p">}</span>
+        <span class="n">operator</span> <span class="o">=</span> <span class="n">operators</span><span class="p">[</span><span class="n">prism_expr</span><span class="o">.</span><span class="n">operator</span><span class="p">]</span>
+        <span class="n">operands</span> <span class="o">=</span> <span class="p">(</span><span class="n">_translate_prism_expression</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">prism_expr</span><span class="o">.</span><span class="n">get_operand</span><span class="p">(</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">prism_expr</span><span class="o">.</span><span class="n">arity</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">operator</span><span class="p">(</span><span class="o">*</span><span class="n">operands</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">prism_expr</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+<span class="k">def</span> <span class="nf">_define_guard</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
+    <span class="n">script</span><span class="o">.</span><span class="n">add_comment</span><span class="p">(</span>
+        <span class="s2">&quot;--- guard function ---&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;guard env = 1 iff state env satisfies the loop guard&quot;</span>
+    <span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">env</span>
+    <span class="n">guard_formula</span> <span class="o">=</span> <span class="n">_translate_prism_expression</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">env</span><span class="p">,</span> <span class="n">program</span><span class="o">.</span><span class="n">guard</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_define_fun</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;guard&quot;</span><span class="p">,</span>
+        <span class="n">return_type</span><span class="o">=</span><span class="n">BOOL</span><span class="p">,</span>
+        <span class="n">make_formula</span><span class="o">=</span><span class="k">lambda</span> <span class="n">guard</span><span class="p">:</span> <span class="n">Iff</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">guard</span><span class="p">),</span> <span class="n">guard_formula</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_define_goal</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">):</span>
+    <span class="n">script</span><span class="o">.</span><span class="n">add_comment</span><span class="p">(</span>
+        <span class="s2">&quot;--- goal function ---&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;goal env = 1 iff state env is a goal state&quot;</span>
+    <span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">env</span>
+    <span class="n">goal_formula</span> <span class="o">=</span> <span class="n">_translate_prism_expression</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">program</span><span class="o">.</span><span class="n">goal</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_define_fun</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;goal&quot;</span><span class="p">,</span>
+        <span class="n">return_type</span><span class="o">=</span><span class="n">BOOL</span><span class="p">,</span>
+        <span class="n">make_formula</span><span class="o">=</span><span class="k">lambda</span> <span class="n">goal</span><span class="p">:</span> <span class="n">Iff</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">goal</span><span class="p">),</span> <span class="n">goal_formula</span><span class="p">)</span>
+    <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_assert_sink_states</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">ev</span><span class="p">,</span> <span class="n">guard</span><span class="p">,</span> <span class="n">goal</span><span class="p">):</span>
+    <span class="n">script</span><span class="o">.</span><span class="n">add_comment</span><span class="p">(</span>
+        <span class="s2">&quot;--- sink states ---&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;The probability ev env to reach a goal state is 0, if guard env = false and goal env = false&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Note that a program state is considered a goal state if guard env = false and goal env = true&quot;</span>
+    <span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">env</span>
+    <span class="n">script</span><span class="o">.</span><span class="n">add_assert_formula</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">forall</span><span class="p">(</span>
+        <span class="n">Implies</span><span class="p">(</span>
+            <span class="n">And</span><span class="p">(</span><span class="n">Not</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">guard</span><span class="p">)),</span> <span class="n">Not</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">goal</span><span class="p">))),</span>
+            <span class="n">Equals</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">ev</span><span class="p">),</span> <span class="n">Real</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+        <span class="p">)</span>
+    <span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_translate_command</span><span class="p">(</span><span class="n">program</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">ev</span><span class="p">):</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">env</span>
+    <span class="k">return</span> <span class="n">Plus</span><span class="p">(</span><span class="o">*</span><span class="p">(</span>
+        <span class="n">Times</span><span class="p">(</span>
+            <span class="n">_translate_prism_expression</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">update</span><span class="o">.</span><span class="n">probability_expression</span><span class="p">),</span>
+            <span class="n">program</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span> <span class="p">{</span>
+                <span class="n">asgn</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">_translate_prism_expression</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">asgn</span><span class="o">.</span><span class="n">expression</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">asgn</span> <span class="ow">in</span> <span class="n">update</span><span class="o">.</span><span class="n">assignments</span>
+            <span class="p">})</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">update</span> <span class="ow">in</span> <span class="n">command</span><span class="o">.</span><span class="n">updates</span>
+    <span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_define_phi</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span> <span class="n">ev</span><span class="p">,</span> <span class="n">guard</span><span class="p">,</span> <span class="n">goal</span><span class="p">):</span>
+    <span class="n">script</span><span class="o">.</span><span class="n">add_comment</span><span class="p">(</span>
+        <span class="s2">&quot;--- One transition step from </span><span class="si">%s</span><span class="s2"> ---&quot;</span> <span class="o">%</span> <span class="n">ev</span>
+    <span class="p">)</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">env</span>
+    <span class="k">def</span> <span class="nf">bool_to_real</span><span class="p">(</span><span class="n">formula</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Ite</span><span class="p">(</span><span class="n">formula</span><span class="p">,</span> <span class="n">Real</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">Real</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">smart_ite</span><span class="p">(</span><span class="n">iff</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">iff</span><span class="o">.</span><span class="n">is_true</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">left</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Ite</span><span class="p">(</span><span class="n">iff</span><span class="p">,</span> <span class="n">left</span><span class="p">,</span> <span class="n">right</span><span class="p">)</span>
+
+    <span class="n">update_formulas</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">smart_ite</span><span class="p">(</span>
+            <span class="n">_translate_prism_expression</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">command</span><span class="o">.</span><span class="n">guard_expression</span><span class="p">),</span>
+            <span class="n">_translate_command</span><span class="p">(</span><span class="n">program</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">ev</span><span class="p">),</span>
+            <span class="n">Real</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">program</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">commands</span>
+    <span class="p">)</span>
+
+    <span class="n">_define_fun</span><span class="p">(</span><span class="n">script</span><span class="p">,</span> <span class="n">program</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;phi&quot;</span><span class="p">,</span>
+        <span class="n">return_type</span><span class="o">=</span><span class="n">REAL</span><span class="p">,</span>
+        <span class="n">make_formula</span><span class="o">=</span><span class="k">lambda</span> <span class="n">phi</span><span class="p">:</span> <span class="n">Equals</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">phi</span><span class="p">),</span>
+            <span class="n">Ite</span><span class="p">(</span>
+                <span class="n">env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">guard</span><span class="p">),</span>
+                <span class="n">Plus</span><span class="p">(</span><span class="o">*</span><span class="n">update_formulas</span><span class="p">),</span>
+                <span class="n">bool_to_real</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">goal</span><span class="p">))</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2019, Philipp Schroer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.1.2</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

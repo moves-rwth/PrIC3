@@ -1,0 +1,31 @@
+===================
+PrIC3 Documentation
+===================
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+* :ref:`genindex`
+* :ref:`modindex`
+
+API Reference
+=============
+
+.. contents::
+   :local:
+
+.. automodule:: pric3
+.. automodule:: pric3.cmd
+
+PRISM to SMT Translation
+------------------------
+.. automodule:: pric3.prism_to_smt
+
+SMT API Wrapper
+---------------
+.. automodule:: pric3.smt
+
+Utils
+-----
+.. automodule:: pric3.utils

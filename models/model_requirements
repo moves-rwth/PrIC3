@@ -1,0 +1,17 @@
+In a PRISM Program:
+
+    - We have exactly one module called main
+    - the model needs do be deterministic
+    - all constants are defined
+    - All Integer/Boolean Variables are declared in main
+    - All variables are initialized (using init in variable declarations)
+    - There must be a label called "guard"
+    - There muste be a label called "goal"
+    -
+    ---------- The following should be supported. More would be nice.------------
+    - Supported (Binary) Arithmetic expressions: +,-,/
+    - Supported (Unary) Arithmetic expressions: -
+    - Supported Binary Numerical Relations: =, !=, < , <= , >=, >
+    - Supported (Binary) Boolean operations: and, or
+    - Supported (Unary) Boolean operations: not
+    - Support if-then-else expressions?
