@@ -1,6 +1,6 @@
 # PrIC3
 
-Probabilistic IC3: A prototype implementation of [PrIC3: Property Directed Reachability for MDPs](cav_artifact/paper.pdf).
+Probabilistic IC3: A prototype implementation of [PrIC3: Property Directed Reachability for MDPs](https://arxiv.org/abs/2004.14835).
 
 ## CAV Artifact Docker Image
 
