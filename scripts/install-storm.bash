@@ -14,8 +14,10 @@ if [ ! -d "storm" ]; then
   mkdir build
 else
   cd storm
-  git pull origin master
+  git fetch --all
 fi
+
+git checkout 1.5.1
 
 # If we don't have at least 4 GB of RAM, use just one CPU core.
 MEM_AVAILABLE="$(awk '/^MemAvailable:/ { print $2; }' /proc/meminfo)"

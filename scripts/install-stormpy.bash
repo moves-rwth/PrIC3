@@ -23,7 +23,7 @@ if [ ! -d "stormpy" ]; then
   mkdir build
 else
   cd stormpy
-  git pull origin master
+  git fetch --all
 fi
 
 git checkout e30b7da2e943060e0e95e34a32595d2bdfda0710
