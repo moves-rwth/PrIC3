@@ -127,11 +127,11 @@ class Pric3Checker:
     def run(self, limits: Limits, model: Model, lam: float) -> RuntimeResult:
         repeat_count = 5 if self.oracle_type == "simulation" else 1
         results = [
-            self._run_once(limits, model, lam) for _i in range(repeat_count)
+            self.run_once(limits, model, lam) for _i in range(repeat_count)
         ]
         return best_result(results)
 
-    def _run_once(self, limits: Limits, model: Model,
+    def run_once(self, limits: Limits, model: Model,
                   lam: float) -> RuntimeResult:
         tag = str(int(time.time()))
 
