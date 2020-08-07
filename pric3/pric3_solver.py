@@ -2,6 +2,7 @@ import logging
 import time
 
 from z3 import *
+from pric3.utils import OneshotSolver
 
 logger = logging.getLogger(__name__)
 
@@ -15,26 +16,27 @@ class PrIC3Solver:
 
         self.solvers = []
         self.opt_solvers = []
-        
+
         self.initialize_f0()
         # Phi Applied remains constant.
         self._phi_applied = self.smt_program.env.apply_to_state_valuation(self.smt_program.phi)
-        self._fresh_initialized_solver = Solver()
-        self.initialize_solver(self._fresh_initialized_solver)
+        #self._fresh_initialized_solver = Solver()
+        #self.initialize_solver(self._fresh_initialized_solver)
         self.stats = stats
         self._calls = 0
         self._store_check_calls = store_smt_calls
         self._stored_calls = []
 
     def add_new_solver(self):
-        solver = self._fresh_initialized_solver.translate(self._fresh_initialized_solver.ctx)
-        #solver = SolverFor("QF_NRA")
+        #solver = OneshotSolver(SolverFor("QF_NRA"))
+        solver = OneshotSolver()
+        self.initialize_solver(solver)
         self.solvers.append(solver)
         #print(solver.sexpr())
 
     def initialize_f0(self):
-        solver = Solver()
-        #solver = SolverFor("QF_NRA")
+        #solver = OneshotSolver(SolverFor("QF_NRA"))
+        solver = OneshotSolver()
         self.solvers.append(solver)
 
         self.initialize_solver(solver)

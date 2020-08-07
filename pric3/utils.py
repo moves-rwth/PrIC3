@@ -1,8 +1,9 @@
 from fractions import Fraction
-from typing import List, Any, BinaryIO
+from typing import List, Any, BinaryIO, Optional
 from io import StringIO
 from tempfile import NamedTemporaryFile
 from z3 import BoolRef, Z3_mk_ge, Z3_mk_eq, Solver, sat, Int, unsat, unknown, Real, And, Z3_mk_le, RealVal
+import z3
 import math
 import os
 import pickle
@@ -231,3 +232,114 @@ def setup_sigint_handler():
         signal.signal(signum, signal.SIG_DFL)
         os.kill(os.getpid(), signum)
     signal.signal(signal.SIGINT, handle_int)
+
+z3.set_param(verbose=15)
+z3.set_param("combined_solver.solver2_timeout", 0)
+
+class OneshotSolver:
+    """
+    The Z3 solver wrapped in such a way that every call is not incremental.
+    This avoids using the incremental solver, because it is very slow for our use cases.
+
+    Also adding assertions is slightly simplified and does not support AstVectors, whatever those are.
+    And we cache the BoolSort.
+    """
+
+    _solver: Solver
+    _version_solver: int = 0
+    _stack: List[List[z3.AstRef]]
+    _version_stack: int = 0
+    _bool_sort: z3.BoolSortRef
+
+    def __init__(self, solver: Optional[Solver] = None):
+        if solver is None:
+            solver = Solver()
+        self._solver = solver
+        self._stack = [[]]
+        self._bool_sort = z3.BoolSort(solver.ctx)
+
+    @property
+    def ctx(self):
+        return self._solver.ctx
+
+    @property
+    def level(self):
+        return len(self._stack)
+
+    def assertions(self):
+        return [assertion for level in self._stack for assertion in level]
+
+    def push(self):
+        """
+        Create a backtracking point.
+        """
+        self._stack.append(list())
+        self._version_stack += 1
+
+    def pop(self):
+        """
+        Pop off a backtracking point.
+        """
+        self._stack.pop()
+        assert len(self._stack) >= 1
+        self._version_stack += 1
+
+    def add(self, *formulae):
+        """
+        Add some formulae onto the stack.
+        """
+        assertions = map(self._bool_sort.cast, formulae)
+        self._stack[len(self._stack) - 1].extend(assertions)
+        self._version_stack += 1
+
+    def _update_stack(self):
+        assert self._version_solver <= self._version_stack
+        if self._version_solver == self._version_stack:
+            return
+
+        self._solver.reset()
+
+        count = 0
+        for level in self._stack:
+            for assertion in level:
+                count += 1
+                # calling the FFI function directly is much faster than the Solver.add function
+                # which does a bunch of stuff we don't need and which slows us down
+                z3.Z3_solver_assert(self._solver.ctx.ref(), self._solver.solver, assertion.as_ast())
+
+        self._version_solver = self._version_stack
+
+    def sexpr(self) -> str:
+        """
+        Return the s-expression representation of the solver **after the last check call**.
+
+        This is different from z3's Solver API which always returns the current solver state, with modifications from push/pop always applied directly.
+        But most of the time, we are actually interested in what the last query looks like regardless of recent modifications to the solver, so we don't update the solver here.
+        This new behavior mirrors the behavior of the model function.
+        """
+        return self._solver.sexpr()
+
+    def check(self, *assumptions) -> z3.CheckSatResult:
+        """
+        Check whether the assertions in the given solver plus the optional assumptions are consistent or not.
+
+        Important! This method asserts the result is either SAT or UNSAT, unknown will throw an error.
+        We'll never handle unknown results anyway, so this is an important sanity check.
+        """
+        self._update_stack()
+
+        assumptions = list(assumptions)
+        if len(assumptions) != 0:
+            self.push()
+            self.add(*assumptions)
+
+        res = self._solver.check()
+        assert res != unknown
+
+        if len(assumptions) != 0:
+            self.pop()
+
+        return res
+
+    def model(self) -> z3.ModelRef:
+        return self._solver.model()
