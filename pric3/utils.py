@@ -206,8 +206,8 @@ def unpickle_all_in_directory(directory_path: str) -> List[Any]:
     Unpickle all files in a directory.
     """
     objects = []
-    for filename in os.listdir(directory_path):
-        path = os.path.join(directory_path, filename)
+    files = sorted(pathlib.Path(directory_path).iterdir(), key=os.path.getmtime)
+    for path in files:
         try:
             objects.append(pickle.load(open(path, "rb")))
         except EOFError:
