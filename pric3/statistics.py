@@ -49,6 +49,7 @@ class Statistics:
     """
 
     def __init__(self, args: Dict[str, Any]):
+        self.command_str = " ".join(map(shlex.quote, sys.argv))
         self.start_timestamp = datetime.now()
         self.made_no_progress_in_oracle_states_after_bellman_counter = 0
         self.frame_push_time = 0

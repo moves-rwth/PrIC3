@@ -46,7 +46,7 @@ class PrIC3Solver:
     # Adds all formulas onto the solver that remain their all the time
     def initialize_solver(self, solver):
         for formula in self.smt_program.get_all_initial_formulas():
-            _solver_add(solver, formula)
+            solver.add(formula)
 
 
     # Keep in mind: 0-step probability is 1 if goal and var range, 0 otherwise
@@ -61,7 +61,7 @@ class PrIC3Solver:
 
 
     def add_assertion(self, frame_index, assertion):
-        _solver_add(self.solvers[frame_index], assertion)
+        self.solvers[frame_index].add(assertion)
 
     def is_relative_inductive(self, frame_index, state_args, expression, ignore_stats = False):
         """
