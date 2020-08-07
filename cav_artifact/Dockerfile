@@ -13,6 +13,5 @@ RUN bash scripts/install.bash
 
 WORKDIR /root/
 COPY cav_artifact/README.md .
-COPY cav_artifact/table1_additional_results.pdf .
 
 CMD bash -c 'cd /root && source artifact/env_python/bin/activate && exec bash'
