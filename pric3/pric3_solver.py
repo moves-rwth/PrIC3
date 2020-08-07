@@ -150,6 +150,9 @@ class PrIC3Solver:
                         continue
 
                     else:
+                        if res == unknown:
+                            print(self.solvers[frame_index].sexpr())
+                            assert False
                         self.solvers[frame_index].pop()
                         return True
 
