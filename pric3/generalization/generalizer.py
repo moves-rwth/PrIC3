@@ -547,6 +547,8 @@ class Generalizer:
             #print("Discarded poly %s > 1" % polynomial)
             return False
 
+        self.solver.pop()
+
         return True
 
 
