@@ -51,9 +51,6 @@ class Pric3SolverStatistics:
         return self.check_relative_inductive_time_inductive + self.check_relative_inductive_time_not_inductive
 
     def add_query(self, solver, time_seconds: float, result):
-        print(time_seconds, result)
-        if time_seconds > 3:
-            print(solver.sexpr())
         if result == sat:
             if time_seconds < self.fast_sat_query[0]:
                 self.fast_sat_query = (time_seconds, solver.sexpr())

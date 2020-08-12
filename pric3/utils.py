@@ -233,9 +233,6 @@ def setup_sigint_handler():
         os.kill(os.getpid(), signum)
     signal.signal(signal.SIGINT, handle_int)
 
-z3.set_param(verbose=15)
-z3.set_param("combined_solver.solver2_timeout", 0)
-
 class OneshotSolver:
     """
     The Z3 solver wrapped in such a way that every call is not incremental.
