@@ -3,10 +3,13 @@ import time
 import pickle
 from pric3.utils import create_binary_file_with_incremental_name, unpickle_all_in_directory
 from pric3.state_graph import StateId
-from typing import List, Dict, Any, Set, BinaryIO
+from typing import List, Dict, Any, Set, BinaryIO, Tuple, Optional
 import pandas as pd
 from pandas.io.json import json_normalize
 from datetime import datetime
+import shlex
+import sys
+from z3 import sat, unsat, unknown
 
 class Pric3SolverStatistics:
     """
@@ -18,6 +21,11 @@ class Pric3SolverStatistics:
         self.check_relative_inductive_time_inductive = 0
         self.check_relative_inductive_time_not_inductive = 0
         self._check_relative_inductiveness_timer = None
+        self.fast_sat_query: Tuple[float, str] = (float('inf'), "")
+        self.slow_sat_query: Tuple[float, str] = (float('-inf'), "")
+        self.fast_unsat_query: Tuple[float, str] = (float('inf'), "")
+        self.slow_unsat_query: Tuple[float, str] = (float('-inf'), "")
+        self.unknown_query: Optional[str] = None
 
     def start_check_relative_inductiveness_timer(self):
         assert self._check_relative_inductiveness_timer is None
@@ -42,6 +50,19 @@ class Pric3SolverStatistics:
     def check_relative_inductive_time(self):
         return self.check_relative_inductive_time_inductive + self.check_relative_inductive_time_not_inductive
 
+    def add_query(self, solver, time_seconds: float, result):
+        if result == sat:
+            if time_seconds < self.fast_sat_query[0]:
+                self.fast_sat_query = (time_seconds, solver.sexpr())
+            if time_seconds > self.slow_sat_query[0]:
+                self.slow_sat_query = (time_seconds, solver.sexpr())
+        if result == unsat:
+            if time_seconds < self.fast_unsat_query[0]:
+                self.fast_unsat_query = (time_seconds, solver.sexpr())
+            if time_seconds > self.slow_unsat_query[0]:
+                self.slow_unsat_query = (time_seconds, solver.sexpr())
+        if result == unknown and self.unknown_query is None:
+            self.unknown_query = solver.sexpr()
 
 class Statistics:
     """
@@ -49,6 +70,7 @@ class Statistics:
     """
 
     def __init__(self, args: Dict[str, Any]):
+        self.command_str = " ".join(map(shlex.quote, sys.argv))
         self.start_timestamp = datetime.now()
         self.made_no_progress_in_oracle_states_after_bellman_counter = 0
         self.frame_push_time = 0

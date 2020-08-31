@@ -529,7 +529,9 @@ class Generalizer:
 
         self.solver.add(polynomial < 0)
 
-        if self.solver.check() == sat:
+        res = self.solver.check()
+        assert res != unknown
+        if res == sat:
             self.solver.pop()
             self.solver.pop()
             #print("Discarded poly %s < 0" % polynomial)
@@ -538,10 +540,14 @@ class Generalizer:
         self.solver.pop()
         self.solver.add(polynomial > 1)
 
-        if self.solver.check() == sat:
+        res = self.solver.check()
+        assert res != unknown
+        if res == sat:
             self.solver.pop()
             #print("Discarded poly %s > 1" % polynomial)
             return False
+
+        self.solver.pop()
 
         return True
 

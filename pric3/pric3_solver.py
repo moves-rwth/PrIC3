@@ -1,7 +1,8 @@
 import logging
-
+import time
 
 from z3 import *
+from pric3.utils import OneshotSolver
 
 logger = logging.getLogger(__name__)
 
@@ -15,26 +16,27 @@ class PrIC3Solver:
 
         self.solvers = []
         self.opt_solvers = []
-        
+
         self.initialize_f0()
         # Phi Applied remains constant.
         self._phi_applied = self.smt_program.env.apply_to_state_valuation(self.smt_program.phi)
-        self._fresh_initialized_solver = Solver()
-        self.initialize_solver(self._fresh_initialized_solver)
+        #self._fresh_initialized_solver = Solver()
+        #self.initialize_solver(self._fresh_initialized_solver)
         self.stats = stats
         self._calls = 0
         self._store_check_calls = store_smt_calls
         self._stored_calls = []
 
     def add_new_solver(self):
-        solver = self._fresh_initialized_solver.translate(self._fresh_initialized_solver.ctx)
-        #solver = SolverFor("QF_NRA")
+        #solver = OneshotSolver(SolverFor("QF_NRA"))
+        solver = OneshotSolver()
+        self.initialize_solver(solver)
         self.solvers.append(solver)
         #print(solver.sexpr())
 
     def initialize_f0(self):
-        solver = Solver()
-        #solver = SolverFor("QF_NRA")
+        #solver = OneshotSolver(SolverFor("QF_NRA"))
+        solver = OneshotSolver()
         self.solvers.append(solver)
 
         self.initialize_solver(solver)
@@ -46,7 +48,7 @@ class PrIC3Solver:
     # Adds all formulas onto the solver that remain their all the time
     def initialize_solver(self, solver):
         for formula in self.smt_program.get_all_initial_formulas():
-            _solver_add(solver, formula)
+            solver.add(formula)
 
 
     # Keep in mind: 0-step probability is 1 if goal and var range, 0 otherwise
@@ -61,7 +63,7 @@ class PrIC3Solver:
 
 
     def add_assertion(self, frame_index, assertion):
-        _solver_add(self.solvers[frame_index], assertion)
+        self.solvers[frame_index].add(assertion)
 
     def is_relative_inductive(self, frame_index, state_args, expression, ignore_stats = False):
         """
@@ -84,28 +86,26 @@ class PrIC3Solver:
 
         #TODO: use assumptions again.
 
-        if self.settings.generalize:
+        res = None
+        try:
             self.solvers[frame_index].push()
-            self.solvers[frame_index].add(And(_lt_no_coerce(expression,self._phi_applied), *state_args))
+            self.solvers[frame_index].add(And(_lt_no_coerce(expression, self._phi_applied), *state_args))
             res = self.solvers[frame_index].check()
+        finally:
+            if not ignore_stats:
+                self.stats.add_query(self.solvers[frame_index], time.time() - self.stats._check_relative_inductiveness_timer, res)
 
-        else:
-            res = self.solvers[frame_index].check(_lt_no_coerce(expression,self._phi_applied), *state_args)
-            #Sometimes, this call yields unkown!
-
-
+            if not ignore_stats:
+                self.stats.stop_check_relative_inductiveness_timer(res != sat)
 
         if res == unknown:
             print(self.solvers[frame_index].sexpr())
-            raise Exception("is_relative_inductive: Result of SMT Call is UNKOWN")
+            raise Exception("is_relative_inductive: Result of SMT Call is UNKNOWN")
 
-        if not ignore_stats:
-            self.stats.stop_check_relative_inductiveness_timer(res != sat)
 
         self._calls += 1
         if self._store_check_calls != 0 and self._calls % self._store_check_calls == 0:
             self._store_call(frame_index, state_args, not res, _lt_no_coerce(expression,self._phi_applied), *state_args)
-
 
 
         # In case we generalize and use reals instead of ints, we have to ensure that the program variables are assgined integer values.
@@ -113,16 +113,18 @@ class PrIC3Solver:
 
             model = self.solvers[frame_index].model()
 
-            if self.settings.generalize:
-                self.solvers[frame_index].pop()
+            self.solvers[frame_index].pop()
 
             # If we generalize and use real numbers, then we have to ensure that we get an integer solution as a counter example to inductivity
             # If we do not generalize or do not use reals, then this is ensured.
             if self.settings.int_to_real and self.settings.generalize:
                 to_assert = []
 
+                i = 0
                 while True:
-                    #print("In check-if-integer-loop.")
+                    i = i + 1
+
+                    print(f'In check-if-integer-loop: {i}')
                     # Check if every variable is an integer solution
                     is_int = True
                     for var in self.smt_program.input_program.module.integer_variables:
@@ -141,7 +143,17 @@ class PrIC3Solver:
                     self.solvers[frame_index].add(And(_lt_no_coerce(expression, self._phi_applied), *state_args))
                     self.solvers[frame_index].add(And(to_assert))
 
-                    res = self.solvers[frame_index].check(And(_lt_no_coerce(expression, self._phi_applied), *state_args))
+                    if not ignore_stats:
+                        self.stats.start_check_relative_inductiveness_timer()
+
+                    try:
+                        res = self.solvers[frame_index].check(And(_lt_no_coerce(expression, self._phi_applied), *state_args))
+                    finally:
+                        if not ignore_stats:
+                            self.stats.add_query(self.solvers[frame_index], time.time() - self.stats._check_relative_inductiveness_timer, res)
+
+                        if not ignore_stats:
+                            self.stats.stop_check_relative_inductiveness_timer(res != sat)
 
                     # Check if counterexample still exists
                     if res == sat:
@@ -150,6 +162,9 @@ class PrIC3Solver:
                         continue
 
                     else:
+                        if res == unknown:
+                            print(self.solvers[frame_index].sexpr())
+                            assert False
                         self.solvers[frame_index].pop()
                         return True
 
@@ -157,8 +172,7 @@ class PrIC3Solver:
 
         else:
             if res == sat: model = self.solvers[frame_index].model()
-            if self.settings.generalize:
-                self.solvers[frame_index].pop()
+            self.solvers[frame_index].pop()
 
         return True if res == unsat else model
 
@@ -210,19 +224,10 @@ def _to_sexpr(self, *expr):
 
 
 
-def _eq_no_coerce(left,right):
-    #TODO add assertion for coercion-free
+def _eq_no_coerce(left, right):
+    # TODO add assertion for coercion-free
     return BoolRef(Z3_mk_eq(left.ctx_ref(), left.as_ast(), right.as_ast()), left.ctx)
 
-def _lt_no_coerce(left,right):
-    #TODO add assertion for coercion-free
+def _lt_no_coerce(left, right):
+    # TODO add assertion for coercion-free
     return BoolRef(Z3_mk_lt(left.ctx_ref(), left.as_ast(), right.as_ast()), left.ctx)
-
-def _solver_add(solver,expr):
-    #TODO add assertions for bool type
-    Z3_solver_assert(solver.ctx.ref(), solver.solver, expr.as_ast())
-
-def _solver_add_it(solver,exprs):
-    #TODO add assertions for bool type
-    for expr in exprs:
-        _solver_add(solver,expr)
