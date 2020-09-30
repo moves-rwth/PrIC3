@@ -29,14 +29,14 @@ class PrIC3Solver:
 
     def add_new_solver(self):
         #solver = OneshotSolver(SolverFor("QF_NRA"))
-        solver = OneshotSolver()
+        solver = OneshotSolver() if self.settings.generalize else Solver()
         self.initialize_solver(solver)
         self.solvers.append(solver)
         #print(solver.sexpr())
 
     def initialize_f0(self):
         #solver = OneshotSolver(SolverFor("QF_NRA"))
-        solver = OneshotSolver()
+        solver = OneshotSolver() if self.settings.generalize else Solver()
         self.solvers.append(solver)
 
         self.initialize_solver(solver)
